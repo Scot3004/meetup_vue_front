@@ -23,7 +23,7 @@
 </template>
 <script>
   import router from './router'
-  import axios from 'axios'
+  import axios from './axios'
   export default {
     data: () => {
       return {
@@ -44,15 +44,19 @@
       login() {
         console.log(this.name)
         if (this.$refs.form.validate()) {
-          axios.post('http://localhost:5000/auth', {
+          axios.post('auth', {
             username: this.name,
             password: this.password
           }).then( (response) => {
-            this.message = ''
-            window.localStorage.setItem('token', response.data.access_token);
+            this.message = '';
+            const token = response.data.access_token;
+            axios.defaults.headers['Authorization'] = 'JWT '+token
+            window.localStorage.setItem('token', token);
             router.push({'name':'saludo'});
           }).catch ( (response) => {
             this.message = response.message;
+            axios.defaults.headers['Authorization'] = '';
+            window.localStorage.removeItem('token')
           })
         }
       }
